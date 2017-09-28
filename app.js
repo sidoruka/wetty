@@ -95,9 +95,13 @@ io.on('connection', function(socket){
     var sshuser = '';
     var request = socket.request;
     console.log((new Date()) + ' Connection accepted.');
+    //if (match = request.headers.referer.match('/wetty/ssh/.+$')) {
+    //    sshuser = match[0].replace('/wetty/ssh/', '') + '@';
+    //} else 
     if (match = request.headers.referer.match('/wetty/ssh/.+$')) {
-        sshuser = match[0].replace('/wetty/ssh/', '') + '@';
-    } else if (globalsshuser) {
+        sshhost = match[0].replace('/wetty/ssh/', '');
+    }  
+    if (globalsshuser) {
         sshuser = globalsshuser + '@';
     }
 

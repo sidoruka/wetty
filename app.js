@@ -60,7 +60,6 @@ httpserv = http.createServer(app).listen(opts.port, function() {
 
 var io = server(httpserv,{path: '/ssh/socket.io'});
 io.on('connection', function(socket){
-    var sshuser = '';
     var request = socket.request;
     console.log((new Date()) + ' Connection accepted.');
     if (match = request.headers.referer.match('/ssh/remote/.+$')) {

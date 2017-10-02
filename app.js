@@ -26,7 +26,6 @@ var opts = require('optimist')
     }).boolean('allow_discovery').argv;
 
 var sshport = 22;
-var sshhost = 'localhost';
 var sshuser = 'root';
 var sshpass = null;
 
@@ -60,6 +59,7 @@ httpserv = http.createServer(app).listen(opts.port, function() {
 
 var io = server(httpserv,{path: '/ssh/socket.io'});
 io.on('connection', function(socket){
+    var sshhost = 'localhost';
     var request = socket.request;
     console.log((new Date()) + ' Connection accepted.');
     if (match = request.headers.referer.match('/ssh/remote/.+$')) {

@@ -8,18 +8,6 @@ var fs = require('fs');
 
 var opts = require('optimist')
     .options({
-        sslkey: {
-            demand: false,
-            description: 'path to SSL key'
-        },
-        sslcert: {
-            demand: false,
-            description: 'path to SSL certificate'
-        },
-        sshhost: {
-            demand: false,
-            description: 'ssh server host'
-        },
         sshport: {
             demand: false,
             description: 'ssh server port'
@@ -28,9 +16,9 @@ var opts = require('optimist')
             demand: false,
             description: 'ssh user'
         },
-        sshauth: {
+	    sshpass: {
             demand: false,
-            description: 'defaults to "password", you can use "publickey,password" instead'
+            description: 'ssh pass'
         },
         port: {
             demand: true,
@@ -39,33 +27,20 @@ var opts = require('optimist')
         },
     }).boolean('allow_discovery').argv;
 
-var runhttps = false;
 var sshport = 22;
 var sshhost = 'localhost';
-var sshauth = 'password,keyboard-interactive';
-var globalsshuser = '';
+var sshuser = 'root';
+var sshpass = null;
 
 if (opts.sshport) {
     sshport = opts.sshport;
 }
 
-if (opts.sshhost) {
-    sshhost = opts.sshhost;
-}
-
-if (opts.sshauth) {
-	sshauth = opts.sshauth
-}
-
 if (opts.sshuser) {
-    globalsshuser = opts.sshuser;
+    sshuser = opts.sshuser;
 }
-
-if (opts.sslkey && opts.sslcert) {
-    runhttps = true;
-    opts['ssl'] = {};
-    opts.ssl['key'] = fs.readFileSync(path.resolve(opts.sslkey));
-    opts.ssl['cert'] = fs.readFileSync(path.resolve(opts.sslcert));
+if (opts.sshpass) {
+    sshpass = opts.sshpass;
 }
 
 process.on('uncaughtException', function(e) {
@@ -80,45 +55,34 @@ app.get('/wetty/ssh/:user', function(req, res) {
 });
 app.use('/', express.static(path.join(__dirname, 'public')));
 
-if (runhttps) {
-    httpserv = https.createServer(opts.ssl, app).listen(opts.port, function() {
-        console.log('https on port ' + opts.port);
-    });
-} else {
-    httpserv = http.createServer(app).listen(opts.port, function() {
-        console.log('http on port ' + opts.port);
-    });
-}
+
+httpserv = http.createServer(app).listen(opts.port, function() {
+    console.log('http on port ' + opts.port);
+});
 
 var io = server(httpserv,{path: '/wetty/socket.io'});
 io.on('connection', function(socket){
     var sshuser = '';
     var request = socket.request;
     console.log((new Date()) + ' Connection accepted.');
-    //if (match = request.headers.referer.match('/wetty/ssh/.+$')) {
-    //    sshuser = match[0].replace('/wetty/ssh/', '') + '@';
-    //} else 
     if (match = request.headers.referer.match('/wetty/ssh/.+$')) {
         sshhost = match[0].replace('/wetty/ssh/', '');
     }  
-    if (globalsshuser) {
-        sshuser = globalsshuser + '@';
-    }
-
     var term;
-//    if (process.getuid() == 0) {
-//        term = pty.spawn('/usr/bin/env', ['login'], {
-//            name: 'xterm-256color',
-//            cols: 80,
-//            rows: 30
-//        });
-//    } else {
-        term = pty.spawn('sshpass', ['-p', 'cloudpipeline', 'ssh', sshuser + sshhost, '-p', sshport, '-o', 'PreferredAuthentications=' + sshauth], {
+    if(sshpass) {
+        term = pty.spawn('sshpass', ['-p', sshpass, 'ssh', sshuser + '@' + sshhost, '-p', sshport], {
             name: 'xterm-256color',
             cols: 80,
             rows: 30
         });
-//    }
+    }
+    else {
+        term = pty.spawn('ssh', [sshuser + '@' + sshhost, '-p', sshport], {
+            name: 'xterm-256color',
+            cols: 80,
+            rows: 30
+        });
+    }
     console.log((new Date()) + " PID=" + term.pid + " STARTED on behalf of user=" + sshuser)
     term.on('data', function(data) {
         socket.emit('output', data);

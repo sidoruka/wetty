@@ -106,19 +106,19 @@ io.on('connection', function(socket){
     }
 
     var term;
-    if (process.getuid() == 0) {
-        term = pty.spawn('/usr/bin/env', ['login'], {
+//    if (process.getuid() == 0) {
+//        term = pty.spawn('/usr/bin/env', ['login'], {
+//            name: 'xterm-256color',
+//            cols: 80,
+//            rows: 30
+//        });
+//    } else {
+        term = pty.spawn('sshpass', ['-p', 'cloudpipeline', 'ssh', sshuser + sshhost, '-p', sshport, '-o', 'PreferredAuthentications=' + sshauth], {
             name: 'xterm-256color',
             cols: 80,
             rows: 30
         });
-    } else {
-        term = pty.spawn('ssh', [sshuser + sshhost, '-p', sshport, '-o', 'PreferredAuthentications=' + sshauth], {
-            name: 'xterm-256color',
-            cols: 80,
-            rows: 30
-        });
-    }
+//    }
     console.log((new Date()) + " PID=" + term.pid + " STARTED on behalf of user=" + sshuser)
     term.on('data', function(data) {
         socket.emit('output', data);

@@ -48,8 +48,8 @@ process.on('uncaughtException', function(e) {
 var httpserv;
 
 var app = express();
-app.get('/wetty/ssh/:user', function(req, res) {
-    res.sendfile(__dirname + '/public/wetty/index.html');
+app.get('/ssh/remote/:server', function(req, res) {
+    res.sendfile(__dirname + '/public/ssh/index.html');
 });
 app.use('/', express.static(path.join(__dirname, 'public')));
 
@@ -58,13 +58,13 @@ httpserv = http.createServer(app).listen(opts.port, function() {
     console.log('http on port ' + opts.port);
 });
 
-var io = server(httpserv,{path: '/wetty/socket.io'});
+var io = server(httpserv,{path: '/ssh/socket.io'});
 io.on('connection', function(socket){
     var sshuser = '';
     var request = socket.request;
     console.log((new Date()) + ' Connection accepted.');
-    if (match = request.headers.referer.match('/wetty/ssh/.+$')) {
-        sshhost = match[0].replace('/wetty/ssh/', '');
+    if (match = request.headers.referer.match('/ssh/remote/.+$')) {
+        sshhost = match[0].replace('/ssh/remote/', '');
     }  
     var term;
     if(sshpass) {

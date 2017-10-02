@@ -7,14 +7,6 @@
         "pty.js": "^0.3.0",
         "optimist": "^0.6"
     },
-    "devDependencies": {
-        "load-grunt-tasks": "^3.0",
-        "grunt": "^0.4",
-        "grunt-shell": "^1.1",
-        "grunt-mkdir": "^0.1",
-        "grunt-git": "^0.3",
-        "grunt-contrib-clean": "^0.6"
-    },
     "description": "Wetty = Web + tty. Terminal access in browser over http/https ",
     "main": "app.js",
     "repository": {
@@ -24,11 +16,8 @@
     "author": "Krishna Srinivas <krishna.srinivas@gmail.com> (https://github.com/krishnasrinivas)",
     "license": "MIT",
     "bugs": {
-        "url": "https://github.com/krishnasrinivas/wetty/issues"
+        "url": "https://github.com/krishnasrinivas/ssh/issues"
     },
     "homepage": "https://github.com/krishnasrinivas/wetty",
-    "preferGlobal": "true",
-    "bin": {
-        "wetty": "./bin/wetty.js"
-    }
+    "preferGlobal": "true"
 }
